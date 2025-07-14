@@ -313,6 +313,31 @@ create_features <- function(hospital_name, data_path, output_filename) {
     base_data <- process_pathology_data(file_map, base_data, data_path)
     base_data <- process_death_data(file_map, base_data, data_path)
 
+  # 기관별 데이터 형식 통일: NCC 생년월일 형식 변경 (YYYY-MM -> YYYYMM)
+  if (hospital_name == "국립암센터") {
+    # 컬럼 이름에 보이지 않는 문자가 있을 가능성에 대비하여, 패턴 매칭으로 컬럼을 찾아 강제로 rename 후 처리
+    if (any(str_detect(names(base_data), "기본환자생년월"))) {
+      base_data <- base_data %>%
+        rename_with(~"기본환자생년월", .cols = matches("기본환자생년월")) %>%
+        mutate(
+          기본환자생년월 = ifelse(
+            str_detect(기본환자생년월, "-"),
+            {
+              parts <- str_split_fixed(기본환자생년월, "-", 2)
+              year_short <- as.numeric(parts[, 2])
+              year_full <- 1900 + year_short
+              month_num <- match(parts[, 1], month.abb)
+              sprintf("%d-%02d", year_full, month_num)
+            },
+            기본환자생년월
+          )
+        )
+      cat("Normalized NCC birth date format.\n")
+    } else {
+      cat("Warning: '기본환자생년월' column not found for NCC data normalization.\n")
+    }
+  }
+
   # 최종 데이터 저장
   output_path <- file.path("data", "processed", output_filename)
   write_csv(base_data, output_path)
