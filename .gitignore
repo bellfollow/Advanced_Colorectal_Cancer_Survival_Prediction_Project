@@ -1,0 +1,16 @@
+# R-specific temporary files
+.Rhistory
+.RData
+.Rproj.user
+
+# 데이터셋 폴더 
+data/raw/
+data/processed/
+data/preprocessed/
+
+# 결과값 폴더 제외
+results/
+
+# 기타 파일 제외
+*.log
+.DS_Store
