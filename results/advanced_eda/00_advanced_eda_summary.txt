@@ -1,0 +1,119 @@
+--- 고급 탐색적 데이터 분석(Advanced EDA) 요약 보고서 ---
+
+--- Raw Data Loaded ---
+Raw data dimensions: 129129 rows, 39 cols
+
+Table of raw '사망여부':
+
+     N      Y   <NA> 
+114464  14665      0 
+
+Summary of raw '전체생존기간일수':
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    NA's 
+    0.0   381.0   814.0   889.1  1331.0 11105.0     328 
+
+--- Data Cleaned ---
+Cleaned data dimensions: 128801 rows, 39 cols
+
+Table of cleaned '사망여부':
+
+     0      1   <NA> 
+114136  14665      0 
+
+Summary of cleaned '전체생존기간일수':
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    0.0   381.0   814.0   889.1  1331.0 11105.0 
+
+--- 연령 그룹 생성 완료 ---
+
+ EOCRC  LOCRC 
+ 18766 110035 
+
+--- 그룹별 특성 비교 분석 시작 ---
+
+--- 2.1. 그룹별 병기 분포 ---
+       
+                 0          1          2          3          4
+  EOCRC 0.02438486 0.29283902 0.24042811 0.27430211 0.16804590
+  LOCRC 0.02288315 0.27867505 0.31887860 0.25147761 0.12808559
+
+
+--- 2.2. 그룹별 치료 시행률 ---
+# A tibble: 2 × 4
+# Groups:   age_group [2]
+  age_group 방사선치료여부 수술여부 항암치료여부
+  <chr>              <dbl>    <dbl>        <dbl>
+1 EOCRC             0.0862    0.584        0.255
+2 LOCRC             0.0530    0.614        0.197
+
+
+--- 2.3. 그룹별 분자병리 진단율 ---
+# A tibble: 2 × 3
+# Groups:   age_group [2]
+  age_group KRAS_tested MSI_tested
+  <chr>           <dbl>      <dbl>
+1 EOCRC           0.130      0.344
+2 LOCRC           0.123      0.328
+
+--- 변수 간 관계 탐색 시작 ---
+
+
+--- 4.1. 수치형 변수 간 상관 분석 ---
+                   기본환자진단시연령 진단시점_CEA 최고_CEA 전체생존기간일수
+기본환자진단시연령               1.00        -0.01    -0.02            -0.14
+진단시점_CEA                    -0.01         1.00     0.77            -0.07
+최고_CEA                        -0.02         0.77     1.00            -0.05
+전체생존기간일수                -0.14        -0.07    -0.05             1.00
+수술횟수                         0.00        -0.10    -0.10             0.19
+항암치료횟수                    -0.11        -0.02     0.02             0.06
+방사선치료횟수                  -0.07        -0.01     0.05             0.00
+                   수술횟수 항암치료횟수 방사선치료횟수
+기본환자진단시연령     0.00        -0.11          -0.07
+진단시점_CEA          -0.10        -0.02          -0.01
+최고_CEA              -0.10         0.02           0.05
+전체생존기간일수       0.19         0.06           0.00
+수술횟수               1.00         0.00          -0.08
+항암치료횟수           0.00         1.00           0.01
+방사선치료횟수        -0.08         0.01           1.00
+
+
+--- 4.2. 병기별 CEA 수치 요약 ---
+# A tibble: 5 × 5
+  기본환자병기값     n mean_CEA median_CEA sd_CEA
+  <chr>          <int>    <dbl>      <dbl>  <dbl>
+1 0               1276     5.91      0.425   37.0
+2 1              17213     1.89      0.01    20.6
+3 2              19529     4.35      0       33.3
+4 3              15743     6.22      0.01    39.7
+5 4               7877    22.1       0.587   84.9
+
+--- 생존 분석 EDA 시작 ---
+
+
+--- 5. 생존 분석 요약 ---
+
+### 5.1 전체 생존 곡선 요약 (중앙 생존 기간 등) ###
+Call: survfit(formula = surv_obj ~ 1, data = surv_df)
+
+          n events median 0.95LCL 0.95UCL
+[1,] 128801  14665   3192    3082    3464
+
+
+--- 5.1. 연령 그룹별 생존 분석 (Log-rank test) ---
+Call: survfit(formula = surv_obj ~ age_group, data = surv_df)
+
+                     n events median 0.95LCL 0.95UCL
+age_group=EOCRC  18766   2342     NA    3464      NA
+age_group=LOCRC 110035  12323   3067    2906    3229
+
+
+--- 5.2. 병기별 생존 분석 (Log-rank test) ---
+Call: survfit(formula = Surv(전체생존기간일수, 사망여부) ~ 
+    기본환자병기값, data = surv_df_stage)
+
+                     n events median 0.95LCL 0.95UCL
+기본환자병기값=0  1669     85   3842    3351      NA
+기본환자병기값=1 20288    528     NA      NA      NA
+기본환자병기값=2 22357    803     NA      NA      NA
+기본환자병기값=3 18399    933     NA    3397      NA
+기본환자병기값=4  9628   2153   1949    1863    2078
