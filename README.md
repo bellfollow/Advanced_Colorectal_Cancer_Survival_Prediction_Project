@@ -143,3 +143,9 @@ shiny::runApp()
 
 - EOCRC 그룹의 경우, Firth 회귀분석에서 통계적으로 유의미한 예측 변수가 없어 모델링이 수행되지 않았습니다.
 - 이전 프로젝트의 0.5 수준의 AUC보다 개선된 성능을 보였으며, 특히 LOCRC 그룹에서 XGBoost와 GBM 모델이 0.75 이상의 좋은 성능을 달성했습니다.
+
+
+## 대시보드 실행 화면
+![alt text](image.png)
+![alt text](image-2.png)
+![alt text](image-1.png)
