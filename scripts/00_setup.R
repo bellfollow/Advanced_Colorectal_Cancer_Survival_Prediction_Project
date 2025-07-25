@@ -8,12 +8,25 @@ options(repos = c(CRAN = "https://cran.rstudio.com/"))
 required_packages <- c(
   "tidyverse", 
   "conflicted", 
-  "caret",  
-  "naniar",         # 결측치 시각화
-  "DataExplorer",   # 자동 EDA
-  "survival",       # 생존 분석
-  "survminer",      # 생존 분석 시각화
-  "ggcorrplot"      # 상관계수 히트맵
+  "gtsummary", 
+  "finalfit",
+  "GGally",
+  "coxphf",
+  "caret",         # For ML workflow
+  "pROC",          # For AUC-ROC calculation
+  "randomForest",  # Random Forest model
+  "gbm",           # Gradient Boosting Machine
+  "xgboost",       # XGBoost model
+  "themis",        # For SMOTE
+  "naniar",        # 결측치 시각화
+  "DataExplorer",  # 자동 EDA
+  "survival",      # 생존 분석
+  "survminer",     # 생존 분석 시각화
+  "ggcorrplot",     # 상관계수 히트맵
+  "keras",         # For deep learning
+  "dplyr",         # For data manipulation
+  "recipes",       # For data preprocessing
+  "yardstick"      # For model evaluation
 )
 
 # 설치되지 않은 패키지 확인 및 설치

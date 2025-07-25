@@ -4,10 +4,7 @@
 .Rproj.user
 
 # 데이터셋 폴더 
-data/raw/
-data/processed/
-data/preprocessed/
-data/modeling_datasets/
+data/
 
 # 결과값 폴더 제외
 results/
