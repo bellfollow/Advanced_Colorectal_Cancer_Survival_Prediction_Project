@@ -23,6 +23,7 @@
 5.  `04_univariate_analysis.R`: 각 변수가 생존에 미치는 영향을 개별적으로 분석하는 단변량 Cox 회귀 분석을 수행하고, 유의미한 변수를 식별합니다.
 6.  `05_multivariate_analysis.R`: 단변량 분석에서 선택된 변수들을 바탕으로 다변량 Cox 회귀 모델을 구축합니다. 퍼스 회귀를 적용하여 최종 예후 인자를 확정합니다.
 7.  `06_ml_modeling.R`: Firth 회귀분석에서 도출된 유의미한 변수들을 사용하여 생존 예측 머신러닝 모델(Random Forest, GBM, XGBoost)을 구축하고 평가합니다.
+8.  `shiny_app/` 폴더: 전체 분석 결과를 시각화하고 상호작용할 수 있는 R Shiny 대시보드를 구현합니다.
 
 ## 3. 주요 분석 결과
 
@@ -40,7 +41,8 @@
 ├── data/              # 원본 및 전처리된 데이터
 ├── docs/              # 분석 과정 및 결과에 대한 상세 문서
 ├── results/           # 분석 과정에서 생성된 시각화 자료 및 결과 파일
-├── scripts/           # 00부터 05까지의 분석 R 스크립트
+├── scripts/           # 00부터 06까지의 분석 R 스크립트
+├── shiny_app/         # 분석 결과를 시각화하는 대시보드 애플리케이션
 └── README.md          # 프로젝트 요약 파일
 ```
 
@@ -52,6 +54,7 @@
 
 본 프로젝트는 다기관 대장암 임상 데이터를 통합 분석하여, 환자의 생존 예후에 영향을 미치는 주요 인자를 규명하는 것을 목표로 합니다. 특히 조기 발병(EOCRC, 50세 이하)과 후기 발병(LOCRC, 50세 초과) 대장암의 임상적 특성과 예후 인자를 비교 분석하는 데 중점을 둡니다.
 - Python과 R을 섞어 만드려고 하였으나 Python의 ML과정에 맞는 추가적인 데이터 전처리가 필요해 R의 통합으로 진행하는 것이 좋아보여 R과 R_shiny로 만들었습니다. 
+- R Shiny 대시보드를 통해 데이터 전처리 결과와 환자 특성, 생존 분석, 모델 예측 결과를 시각적으로 탐색하고 상호작용할 수 있도록 하여 지속적인 분석과 피드백을 용이하게 했습니다. 
 ## 📊 주요 분석 결과
 
 - **병기(Tumor Stage)**: 모든 환자 그룹에서 생존 예후를 결정하는 가장 압도적인 요인입니다. (4기 vs 0기, 사망 위험 약 6.5배)
@@ -67,6 +70,7 @@
 
 - R (version 4.2 이상)
 - RStudio (권장)
+- R 패키지: tidyverse, survival, caret, shiny, shinydashboard, plotly, DT, survminer, ggplot2
 
 ### 설치 및 설정
 
@@ -74,9 +78,10 @@
 2.  **데이터 배치**: 원본 CSV 파일들을 `data/raw/` 폴더 내 기관별 하위 폴더에 배치합니다.
 3.  **패키지 설치**: R 콘솔에서 아래 명령어를 실행하여 필요한 모든 패키지를 설치합니다.
     ```R
-    if (!require("pacman")) install.packages("pacman")
-    pacman::p_load(tidyverse, caret, survival, survminer, ggcorrplot, gtsummary, conflicted)
-    ```
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, caret, survival, survminer, ggcorrplot, gtsummary, conflicted, 
+               shiny, shinydashboard, plotly, DT, ggrepel, reshape2)
+```
 
 ### 🔬 분석 파이프라인 실행
 
@@ -90,6 +95,10 @@ source("scripts/03_advanced_eda.R")
 source("scripts/04_univariate_analysis.R")
 source("scripts/05_multivariate_analysis.R")
 source("scripts/06_ml_modeling.R")
+
+# Shiny 대시보드 실행
+setwd("shiny_app/")
+shiny::runApp()
 ```
 
 ## 📂 프로젝트 구조
@@ -112,6 +121,7 @@ source("scripts/06_ml_modeling.R")
 - **`04_univariate_analysis.R`**: 단변량 콕스 회귀 분석을 통해 각 변수의 독립적인 예후 연관성을 평가합니다. ([문서](./docs/04_univariate_analysis_summary.md))
 - **`05_multivariate_analysis.R`**: 다변량 콕스 회귀 분석을 통해 여러 변수를 보정한 상태에서의 핵심 예후 인자를 도출합니다. ([문서](./docs/05_multivariate_analysis_total.md))
 - **`06_ml_modeling.R`**: Firth 회귀분석에서 도출된 통계적으로 유의미한 변수들을 사용하여 머신러닝 모델(Random Forest, GBM, XGBoost)을 구축하고 AUC로 성능을 평가합니다. ([문서](./docs/06_ml_modeling_progress.md))
+- **`shiny_app/`**: 데이터 탐색, 생존 분석, 모델 성능을 시각화하는 대화형 R Shiny 대시보드를 구현합니다. ([문서](./docs/07_shiny_dashboard.md))
 
 ## 머신러닝 모델링 결과
 
