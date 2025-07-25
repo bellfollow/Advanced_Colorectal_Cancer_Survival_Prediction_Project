@@ -6,6 +6,12 @@
 
 특히, 통계적 문제인 **완전 분리(Complete Separation)** 현상을 해결하기 위해 **퍼스 페널티 Cox 회귀(Firth's Penalized Cox Regression)**를 적용하여 안정적이고 신뢰도 높은 모델을 구축했습니다. 또한, 환자를 **조기 발병(EOCRC, 50세 이하)**과 **후기 발병(LOCRC, 50세 초과)** 그룹으로 나누어 연령에 따른 예후 인자의 차이를 비교 분석했습니다.
 
+- 해당 프로젝트는 https://www.nature.com/articles/s41598-025-95385-0#Sec18 의 논문을 참고하여 만들어졌습니다.
+- 해당 프로젝트의 데이터셋은 **국립암센터_대장암 다기관 암 임상 라이브러리 합성데이터_20250107**를 활용하여 만들었습니다.
+- 해당 프로젝트는 https://github.com/bellfollow/Colorectal_cancer_survival_prediction 의 고도화 버전으로, 0.5 수준의 AUC를 보완하기 위해 만들어졌으며 이전 데이터셋과의 단순 데이터 크기 차이는 10배 이상 입니다.
+- 이전 프로젝트의 문제였던 적은 표본수를 해결하였습니다.
+- 대시보드를 활용하여 데이터를 전처리 결과를 한눈에 알아보기 편하게 만들어 지속적인 피드백을 진행했습니다.
+
 ## 2. 분석 파이프라인
 
 분석은 `scripts/` 폴더 내의 R 스크립트를 순차적으로 실행하여 진행됩니다.
@@ -16,6 +22,7 @@
 4.  `03_advanced_eda.R`: 그룹 간 임상 특성을 비교하고, 주요 변수 간의 상관관계를 분석하는 등 심층 EDA를 수행합니다.
 5.  `04_univariate_analysis.R`: 각 변수가 생존에 미치는 영향을 개별적으로 분석하는 단변량 Cox 회귀 분석을 수행하고, 유의미한 변수를 식별합니다.
 6.  `05_multivariate_analysis.R`: 단변량 분석에서 선택된 변수들을 바탕으로 다변량 Cox 회귀 모델을 구축합니다. 퍼스 회귀를 적용하여 최종 예후 인자를 확정합니다.
+7.  `06_ml_modeling.R`: Firth 회귀분석에서 도출된 유의미한 변수들을 사용하여 생존 예측 머신러닝 모델(Random Forest, GBM, XGBoost)을 구축하고 평가합니다.
 
 ## 3. 주요 분석 결과
 
@@ -40,7 +47,7 @@
 ## 5. 재현 방법
 
 1.  `data/` 폴더에 원본 데이터셋을 위치시킵니다.
-2.  `scripts/` 폴더의 R 스크립트를 `00_setup.R`부터 `05_multivariate_analysis.R`까지 순서대로 실행합니다.
+2.  `scripts/` 폴더의 R 스크립트를 `00_setup.R`부터 `06_ml_modeling.R`까지 순서대로 실행합니다.
 3.  모든 결과물은 `results/` 폴더에 저장되며, 최종 보고서는 `docs/` 폴더에서 확인할 수 있습니다.
 
 본 프로젝트는 다기관 대장암 임상 데이터를 통합 분석하여, 환자의 생존 예후에 영향을 미치는 주요 인자를 규명하는 것을 목표로 합니다. 특히 조기 발병(EOCRC, 50세 이하)과 후기 발병(LOCRC, 50세 초과) 대장암의 임상적 특성과 예후 인자를 비교 분석하는 데 중점을 둡니다.
@@ -82,6 +89,7 @@ source("scripts/02_split_and_eda.R")
 source("scripts/03_advanced_eda.R")
 source("scripts/04_univariate_analysis.R")
 source("scripts/05_multivariate_analysis.R")
+source("scripts/06_ml_modeling.R")
 ```
 
 ## 📂 프로젝트 구조
@@ -103,3 +111,25 @@ source("scripts/05_multivariate_analysis.R")
 - **`03_advanced_eda.R`**: 카플란-마이어 생존 곡선 등 심층 EDA를 수행합니다. ([문서](./docs/03_advanced_eda_summary.md))
 - **`04_univariate_analysis.R`**: 단변량 콕스 회귀 분석을 통해 각 변수의 독립적인 예후 연관성을 평가합니다. ([문서](./docs/04_univariate_analysis_summary.md))
 - **`05_multivariate_analysis.R`**: 다변량 콕스 회귀 분석을 통해 여러 변수를 보정한 상태에서의 핵심 예후 인자를 도출합니다. ([문서](./docs/05_multivariate_analysis_total.md))
+- **`06_ml_modeling.R`**: Firth 회귀분석에서 도출된 통계적으로 유의미한 변수들을 사용하여 머신러닝 모델(Random Forest, GBM, XGBoost)을 구축하고 AUC로 성능을 평가합니다. ([문서](./docs/06_ml_modeling_progress.md))
+
+## 머신러닝 모델링 결과
+
+### 모델 구현 및 평가
+- **구현 목표**: Firth 회귀분석에서 도출된 유의미한 변수들을 사용하여 그룹별(total, EOCRC, LOCRC) 생존 예측 모델 구축
+- **사용된 알고리즘**: Random Forest, Gradient Boosting Machine(GBM), XGBoost
+- **모델 훈련 방식**: 5-fold 교차 검증, SMOTE를 통한 클래스 불균형 처리
+- **평가 지표**: AUC(Area Under the ROC Curve)
+
+### 주요 성능 결과
+|그룹|모델|AUC|
+|---|---|---|
+|total|Random Forest|0.747|
+|total|GBM|0.656|
+|total|XGBoost|0.656|
+|locrc|Random Forest|0.746|
+|locrc|GBM|0.751|
+|locrc|XGBoost|0.752|
+
+- EOCRC 그룹의 경우, Firth 회귀분석에서 통계적으로 유의미한 예측 변수가 없어 모델링이 수행되지 않았습니다.
+- 이전 프로젝트의 0.5 수준의 AUC보다 개선된 성능을 보였으며, 특히 LOCRC 그룹에서 XGBoost와 GBM 모델이 0.75 이상의 좋은 성능을 달성했습니다.
